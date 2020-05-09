@@ -106,6 +106,12 @@ def f0_dist_conf_thresh(f0_hz,
     delta_f0_mean: Float or None if entire generated sample had
       f0_confidence below threshold. In units of MIDI (logarithmic frequency).
   """
+  if len(f0_hz.shape) > 2:
+    f0_hz = f0_hz[:, :, 0]
+  if len(f0_hz_gen.shape) > 2:
+    f0_hz_gen = f0_hz_gen[:, :, 0]
+  if len(f0_confidence.shape) > 2:
+    f0_confidence = f0_confidence[:, :, 0]
 
   if np.max(f0_confidence) < f0_confidence_thresh:
     # Generated audio is not good enough for reliable pitch tracking.
@@ -389,8 +395,9 @@ def evaluate_or_sample(data_provider,
 
           # Predict a batch of audio.
           batch = next(dataset_iter)
-          audio = batch['audio']
+
           # TODO(jesseengel): Find a way to add losses with training=False.
+          audio = batch['audio']
           audio_gen, losses = model(batch, return_losses=True, training=True)
           outputs = model.get_controls(batch, training=True)
 
